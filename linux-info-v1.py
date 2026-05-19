@@ -4,7 +4,6 @@ import json
 import logging
 import os
 import time
-from langchain.agents import initialize_agent, AgentType
 from langchain_groq import ChatGroq
 from langchain_community.tools import WikipediaQueryRun, DuckDuckGoSearchRun
 from langchain_community.utilities import WikipediaAPIWrapper
@@ -82,30 +81,25 @@ def build_prompt(args):
     return prompt
 
 def run_agent(prompt, api_key):
-    """Initialize and run the LangChain agent.
+    """Initialize and run the LLM with tools.
 
     Args:
         prompt (str): The prompt for the agent.
         api_key (str): Groq API key.
 
     Returns:
-        str: Agent's final response.
+        str: LLM's final response.
     """
-    llm = ChatGroq(temperature=0, groq_api_key=api_key, model_name="mixtral-8x7b-32768")  # Swap model if needed
+    llm = ChatGroq(temperature=0, groq_api_key=api_key, model_name="llama-3.3-70b-versatile")
     tools = [
         WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper()),
         DuckDuckGoSearchRun()
     ]
-    agent = initialize_agent(
-        tools,
-        llm,
-        agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-        verbose=True
-    )
-    logging.info("Agent initialized.")
-    response = agent.run(prompt)
-    logging.info(f"Agent response: {response}")
-    return response
+    llm_with_tools = llm.bind_tools(tools)
+    logging.info("LLM initialized with tools.")
+    response = llm_with_tools.invoke(prompt)
+    logging.info(f"LLM response: {response.content}")
+    return response.content
 
 def main():
     """Main function to parse args, run agent, and handle logging/history."""
