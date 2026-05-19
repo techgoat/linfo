@@ -1,3 +1,5 @@
+# FIle of Sensitive API Keys
+.env
 # Python-generated files
 __pycache__/
 *.py[oc]
