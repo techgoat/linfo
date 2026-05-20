@@ -1,0 +1,53 @@
+2026-05-19 14:08:42,252 - INFO - Inputs validated successfully.
+2026-05-19 14:08:42,252 - INFO - Loaded 0 past queries.
+2026-05-19 14:08:42,252 - INFO - Built prompt: Provide detailed information about the Linux distribution 'Ubuntu' for the 'x86_64' architecture. Tailor the response for a general user. Cover the following topics: basic overview, features, package management. Use tools to fetch accurate, up-to-date info. Reason step-by-step.
+2026-05-19 14:08:43,567 - ERROR - Error: Could not import ddgs python package. Please install it with `pip install -U ddgs`.
+2026-05-19 14:09:47,886 - INFO - Inputs validated successfully.
+2026-05-19 14:09:47,886 - INFO - Loaded 0 past queries.
+2026-05-19 14:09:47,886 - INFO - Built prompt: Provide detailed information about the Linux distribution 'Ubuntu' for the 'x86_64' architecture. Tailor the response for a general user. Cover the following topics: basic overview, features, package management. Use tools to fetch accurate, up-to-date info. Reason step-by-step.
+2026-05-19 14:09:48,871 - ERROR - Error: Could not import ddgs python package. Please install it with `pip install -U ddgs`.
+2026-05-19 14:12:12,462 - INFO - Inputs validated successfully.
+2026-05-19 14:12:12,462 - INFO - Loaded 0 past queries.
+2026-05-19 14:12:12,462 - INFO - Built prompt: Provide detailed information about the Linux distribution 'Ubuntu' for the 'x86_64' architecture. Tailor the response for a general user. Cover the following topics: basic overview, features, package management. Use tools to fetch accurate, up-to-date info. Reason step-by-step.
+2026-05-19 14:12:12,754 - ERROR - Error: Could not import ddgs python package. Please install it with `pip install -U ddgs`.
+2026-05-19 14:14:23,690 - INFO - Inputs validated successfully.
+2026-05-19 14:14:23,690 - INFO - Loaded 0 past queries.
+2026-05-19 14:14:23,690 - INFO - Built prompt: Provide detailed information about the Linux distribution 'Ubuntu' for the 'x86_64' architecture. Tailor the response for a general user. Cover the following topics: basic overview, features, package management. Use tools to fetch accurate, up-to-date info. Reason step-by-step.
+2026-05-19 14:14:23,892 - ERROR - Error: Could not import ddgs python package. Please install it with `pip install -U ddgs`.
+2026-05-19 14:19:02,004 - INFO - Inputs validated successfully.
+2026-05-19 14:19:02,004 - INFO - Loaded 0 past queries.
+2026-05-19 14:19:02,004 - INFO - Built prompt: Provide detailed information about the Linux distribution 'Ubuntu' for the 'x86_64' architecture. Tailor the response for a general user. Cover the following topics: basic overview, features, package management. Use tools to fetch accurate, up-to-date info. Reason step-by-step.
+2026-05-19 14:19:02,320 - INFO - LLM initialized with tools.
+2026-05-19 14:19:02,512 - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 401 Unauthorized"
+2026-05-19 14:19:02,514 - ERROR - Error: Error code: 401 - {'error': {'message': 'Invalid API Key', 'type': 'invalid_request_error', 'code': 'invalid_api_key'}}
+2026-05-20 01:19:46,452 - INFO - Inputs validated successfully.
+2026-05-20 01:19:46,452 - INFO - Loaded 0 past queries.
+2026-05-20 01:19:46,453 - ERROR - Error: GROQ_API_KEY environment variable not set.
+2026-05-20 01:30:02,703 - INFO - Inputs validated successfully.
+2026-05-20 01:30:02,703 - INFO - Loaded 0 past queries.
+2026-05-20 01:30:02,703 - INFO - Built prompt: Provide detailed information about the Linux distribution 'Ubuntu' for the 'x86_64' architecture. Tailor the response for a general user. Cover the following topics: basic overview, features, package management. Use tools to fetch accurate, up-to-date info. Reason step-by-step.
+2026-05-20 01:30:03,325 - INFO - LLM initialized with tools.
+2026-05-20 01:30:05,460 - INFO - HTTP Request: POST https://api.x.ai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-05-20 01:30:05,469 - INFO - LLM response: 
+2026-05-20 01:30:05,470 - INFO - Saved new entry to history: {'timestamp': '2026-05-20 01:30:05', 'args': {'distro': 'Ubuntu', 'arch': 'x86_64', 'level': None, 'topics': None}, 'response': ''}
+2026-05-20 01:31:15,474 - INFO - Inputs validated successfully.
+2026-05-20 01:31:15,474 - INFO - Loaded 1 past queries.
+2026-05-20 01:31:15,475 - INFO - Built prompt: Provide detailed information about the Linux distribution 'Kali' for the 'x86_64' architecture. Tailor the response for a general user. Cover the following topics: basic overview, features, package management. Use tools to fetch accurate, up-to-date info. Reason step-by-step.
+2026-05-20 01:31:15,914 - INFO - LLM initialized with tools.
+2026-05-20 01:31:18,262 - INFO - HTTP Request: POST https://api.x.ai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-05-20 01:31:18,271 - INFO - LLM response: 
+2026-05-20 01:31:18,272 - INFO - Saved new entry to history: {'timestamp': '2026-05-20 01:31:18', 'args': {'distro': 'Kali', 'arch': 'x86_64', 'level': None, 'topics': None}, 'response': ''}
+2026-05-20 01:31:58,517 - INFO - Inputs validated successfully.
+2026-05-20 01:31:58,518 - INFO - Loaded 2 past queries.
+2026-05-20 01:31:58,518 - INFO - Built prompt: Provide detailed information about the Linux distribution 'Kali' for the 'x86_64' architecture. Tailor the response for a intermediate user. Cover the following topics: basic overview, features, package management. Use tools to fetch accurate, up-to-date info. Reason step-by-step.
+2026-05-20 01:31:58,958 - INFO - LLM initialized with tools.
+2026-05-20 01:32:01,355 - INFO - HTTP Request: POST https://api.x.ai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-05-20 01:32:01,364 - INFO - LLM response: 
+2026-05-20 01:32:01,365 - INFO - Saved new entry to history: {'timestamp': '2026-05-20 01:32:01', 'args': {'distro': 'Kali', 'arch': 'x86_64', 'level': 'intermediate', 'topics': None}, 'response': ''}
+2026-05-20 01:33:23,665 - INFO - Inputs validated successfully.
+2026-05-20 01:33:23,665 - INFO - Loaded 3 past queries.
+2026-05-20 01:33:23,665 - INFO - Built prompt: Provide detailed information about the Linux distribution 'Kali' for the 'x86_64' architecture. Tailor the response for a intermediate user. Cover the following topics: features, package_management. Use tools to fetch accurate, up-to-date info. Reason step-by-step.
+2026-05-20 01:33:24,103 - INFO - LLM initialized with tools.
+2026-05-20 01:33:25,951 - INFO - HTTP Request: POST https://api.x.ai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-05-20 01:33:25,960 - INFO - LLM response: 
+2026-05-20 01:33:25,961 - INFO - Saved new entry to history: {'timestamp': '2026-05-20 01:33:25', 'args': {'distro': 'Kali', 'arch': 'x86_64', 'level': 'intermediate', 'topics': 'features,package_management'}, 'response': ''}

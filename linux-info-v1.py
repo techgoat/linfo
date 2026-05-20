@@ -4,12 +4,22 @@ import json
 import logging
 import os
 import time
+from langchain_openai import ChatOpenAI
 from langchain_groq import ChatGroq
 from langchain_community.tools import WikipediaQueryRun, DuckDuckGoSearchRun
 from langchain_community.utilities import WikipediaAPIWrapper
 from dotenv import load_dotenv
 
+
 load_dotenv()
+
+
+# llm = ChatOpenAI(
+#    model="grok-4",  # grok-4 
+#    api_key=os.getenv("XAI_API_KEY"),
+#    base_url="https://api.x.ai/v1"
+# )
+
 
 # Set up logging
 logging.basicConfig(
@@ -93,7 +103,14 @@ def run_agent(prompt, api_key):
     Returns:
         str: LLM's final response.
     """
-    llm = ChatGroq(temperature=0, groq_api_key=api_key, model_name="llama-3.3-70b-versatile")
+#    llm = ChatGroq(temperature=0, groq_api_key=api_key, model_name="llama-3.3-70b-versatile")
+
+    llm = ChatOpenAI(
+        model="grok-4",  # grok-3 or grok-4
+        api_key=os.getenv("XAI_API_KEY"),
+        base_url="https://api.x.ai/v1"
+    )
+
     tools = [
         WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper()),
         DuckDuckGoSearchRun()
@@ -118,9 +135,11 @@ def main():
         history = load_history()
         logging.info(f"Loaded {len(history)} past queries.")
 
-        api_key = os.getenv('GROQ_API_KEY')
+#        api_key = os.getenv('GROQ_API_KEY')
+        api_key = os.getenv('XAI_API_KEY')
         if not api_key:
-            raise ValueError("GROQ_API_KEY environment variable not set.")
+#            raise ValueError("GROQ_API_KEY environment variable not set.")
+            raise ValueError("XAI_API_KEY environment variable not set.")
 
         prompt = build_prompt(args)
         response = run_agent(prompt, api_key)
