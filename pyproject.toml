@@ -12,5 +12,6 @@ dependencies = [
     "langchain-community>=0.4.1",
     "langchain-openai>=0.2.0",
     "langchain-groq>=1.1.1",
+    "rich>=13.9.0",
     "wikipedia>=1.4.0",
 ]

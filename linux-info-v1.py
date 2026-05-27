@@ -5,10 +5,15 @@ import logging
 import os
 import time
 from langchain_openai import ChatOpenAI
-from langchain_groq import ChatGroq
 from langchain_community.tools import WikipediaQueryRun, DuckDuckGoSearchRun
 from langchain_community.utilities import WikipediaAPIWrapper
+from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from dotenv import load_dotenv
+
+from rich.console import Console
+from rich.markdown import Markdown
+from rich.panel import Panel
+from rich.text import Text
 
 
 load_dotenv()
@@ -32,6 +37,9 @@ logging.basicConfig(
 )
 
 HISTORY_FILE = 'query_history.json'
+
+# Rich console for beautiful terminal output
+console = Console()
 
 def load_history():
     """Load past queries from JSON file.
@@ -94,17 +102,18 @@ def build_prompt(args):
     return prompt
 
 def run_agent(prompt, api_key):
-    """Initialize and run the LLM with tools.
+    """Initialize and run the LLM with tools using a manual tool-calling loop.
+
+    The model may request tools (Wikipedia, DuckDuckGo). We execute them
+    and feed results back until the model produces a final text response.
 
     Args:
         prompt (str): The prompt for the agent.
-        api_key (str): Groq API key.
+        api_key (str): XAI API key (loaded via env in caller).
 
     Returns:
-        str: LLM's final response.
+        str: LLM's final response content.
     """
-#    llm = ChatGroq(temperature=0, groq_api_key=api_key, model_name="llama-3.3-70b-versatile")
-
     llm = ChatOpenAI(
         model="grok-4",  # grok-3 or grok-4
         api_key=os.getenv("XAI_API_KEY"),
@@ -115,11 +124,56 @@ def run_agent(prompt, api_key):
         WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper()),
         DuckDuckGoSearchRun()
     ]
+    tool_map = {tool.name: tool for tool in tools}
+
     llm_with_tools = llm.bind_tools(tools)
     logging.info("LLM initialized with tools.")
-    response = llm_with_tools.invoke(prompt)
-    logging.info(f"LLM response: {response.content}")
-    return response.content
+
+    messages = [HumanMessage(content=prompt)]
+    max_iterations = 8
+    final_content = ""
+
+    for iteration in range(max_iterations):
+        response = llm_with_tools.invoke(messages)
+        messages.append(response)
+
+        if not getattr(response, "tool_calls", None):
+            # Model returned final answer (no more tool use requested)
+            final_content = response.content or ""
+            logging.info(f"Final answer received (iteration {iteration}).")
+            break
+
+        # Execute any requested tool calls
+        for tool_call in response.tool_calls:
+            tool_name = tool_call.get("name")
+            tool_args = tool_call.get("args", {})
+            tool_call_id = tool_call.get("id", "")
+
+            if tool_name in tool_map:
+                logging.info(f"Calling tool '{tool_name}' with args: {tool_args}")
+                try:
+                    # Tools expect a dict or specific input; invoke handles it
+                    result = tool_map[tool_name].invoke(tool_args)
+                except Exception as e:
+                    result = f"ERROR running {tool_name}: {str(e)}"
+                    logging.error(result)
+            else:
+                result = f"Unknown tool requested: {tool_name}"
+                logging.warning(result)
+
+            messages.append(
+                ToolMessage(content=str(result), tool_call_id=tool_call_id)
+            )
+
+    if not final_content:
+        # Fallback: last AI message content
+        for msg in reversed(messages):
+            if isinstance(msg, AIMessage) and msg.content:
+                final_content = msg.content
+                break
+
+    logging.info(f"LLM final response length: {len(final_content)} chars")
+    return final_content
 
 def main():
     """Main function to parse args, run agent, and handle logging/history."""
@@ -142,10 +196,43 @@ def main():
             raise ValueError("XAI_API_KEY environment variable not set.")
 
         prompt = build_prompt(args)
-        response = run_agent(prompt, api_key)
 
-        print("\nDistro Information:\n")
-        print(response)
+        # Run the agent with a nice spinner for better UX
+        with console.status(
+            f"[bold cyan]Querying {args.distro} ({args.arch})...[/bold cyan]",
+            spinner="dots",
+            spinner_style="cyan",
+        ):
+            response = run_agent(prompt, api_key)
+
+        # Beautiful formatted output using Rich
+        level = args.level or "general"
+        title = Text.assemble(
+            ("Linux Distro Info: ", "bold white"),
+            (args.distro, "bold cyan"),
+            (f"  •  {args.arch}", "dim"),
+        )
+
+        subtitle = Text.assemble(
+            ("Expertise: ", "dim"),
+            (level, "bold yellow"),
+            ("   •   Topics: ", "dim"),
+            (args.topics or "default", "italic"),
+        )
+
+        md = Markdown(response)
+        panel = Panel(
+            md,
+            title=title,
+            subtitle=subtitle,
+            border_style="bright_blue",
+            padding=(1, 2),
+            expand=True,
+        )
+
+        console.print("\n")  # breathing room
+        console.print(panel)
+        console.print()  # trailing newline
 
         new_entry = {
             'timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),
@@ -156,7 +243,13 @@ def main():
 
     except Exception as e:
         logging.error(f"Error: {str(e)}")
-        print(f"Error: {str(e)}")
+        error_panel = Panel(
+            Text(str(e), style="bold red"),
+            title="[bold red]Error[/bold red]",
+            border_style="red",
+            padding=(1, 2),
+        )
+        console.print(error_panel)
 
 
 if __name__ == "__main__":

@@ -1,3 +1,36 @@
+# Linux Info CLI (2026)
+
+A small agentic Python CLI that uses Grok (via xAI) + Wikipedia/DuckDuckGo tools to give tailored, up-to-date information about any Linux distribution and architecture.
+
+## Current Features
+- Clean, readable output powered by **Rich** (Markdown panels, syntax highlighting, nice headers)
+- Agentic tool use (the model can search the web + Wikipedia in a loop)
+- Query history saved to `query_history.json`
+- Full transaction logging to `transaction_log.txt`
+- Support for expertise level and custom topics
+
+## Usage
+
+```bash
+# After `uv sync`
+uv run python linux-info-v1.py \
+  --distro "Debian" \
+  --arch "x86_64" \
+  --level "beginner" \
+  --topics "overview,package management,getting started"
+```
+
+The output appears in a nicely formatted bordered panel with proper headings, lists, and code formatting.
+
+**Requirements:**
+- `XAI_API_KEY` in `.env` (or environment)
+- Python 3.14+
+- `uv sync` to install dependencies (including `rich`)
+
+---
+
+## Original Design Prompt (for context)
+
 Grok Prompt:
 I want to research and perhaps design a python app that operates at the CLI, and provides 
 basic information about targeted Linux distributions. CLI arguments would at least include 
@@ -53,11 +86,10 @@ Design Overview
 -   Docstrings: Included on all functions.
 -   Structure:
     -   Main script: distro_info.py
-    -   Runs as python distro_info.py --distro Ubuntu --arch x86_64 --level intermediate --topics features,package_management
+    -   Runs as `uv run python linux-info-v1.py --distro Ubuntu --arch x86_64 --level intermediate --topics features,package_management`
     -   Output: Prints tailored info; logs everything.
 
--   Dependencies: pip install langchain langchain-community langchain-groq 
-    duckduckgo-search wikipedia argparse (plus set GROQ_API_KEY env var; get from groq.com).
+-   Dependencies: Managed with `uv`. See `pyproject.toml` (includes langchain, langchain-openai, rich, duckduckgo-search, wikipedia, etc.). Requires `XAI_API_KEY`.
 -   Agent Behavior: The agent receives a prompt based on args and uses tools to compile 
     info (e.g., search for distro features, check architecture support). This makes it 
     "agentic" by allowing multi-step reasoning.
