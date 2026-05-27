@@ -13,12 +13,26 @@ A small agentic Python CLI that uses Grok (via xAI) + Wikipedia/DuckDuckGo tools
 
 ```bash
 # After `uv sync`
+
+# Explore a random popular distribution (recommended quick start)
+uv run python linux-info-v1.py
+
+# Specific distribution with rich formatted output
 uv run python linux-info-v1.py \
   --distro "Debian" \
   --arch "x86_64" \
   --level "beginner" \
   --topics "overview,package management,getting started"
+
+# Show all internal logs (tool calls, history saving, etc.)
+uv run python linux-info-v1.py --distro Fedora --verbose
+# or short form:
+uv run python linux-info-v1.py -v --distro Arch
 ```
+
+**New in this version:**
+- Running the app with **no arguments** automatically picks a random well-known Linux distribution (from a curated list) and gives you information about it.
+- By default the terminal stays clean — detailed logs only appear when you pass `--verbose` / `-v`. Everything is still written to `transaction_log.txt`.
 
 The output appears in a nicely formatted bordered panel with proper headings, lists, and code formatting.
 
@@ -86,7 +100,7 @@ Design Overview
 -   Docstrings: Included on all functions.
 -   Structure:
     -   Main script: distro_info.py
-    -   Runs as `uv run python linux-info-v1.py --distro Ubuntu --arch x86_64 --level intermediate --topics features,package_management`
+    -   Runs as `uv run python linux-info-v1.py` (random distro) or with explicit `--distro` / `--arch` flags. Use `-v`/`--verbose` for full logs.
     -   Output: Prints tailored info; logs everything.
 
 -   Dependencies: Managed with `uv`. See `pyproject.toml` (includes langchain, langchain-openai, rich, duckduckgo-search, wikipedia, etc.). Requires `XAI_API_KEY`.

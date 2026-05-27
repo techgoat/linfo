@@ -26,17 +26,50 @@ load_dotenv()
 # )
 
 
-# Set up logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('transaction_log.txt'),
-        logging.StreamHandler()
-    ]
-)
-
 HISTORY_FILE = 'query_history.json'
+
+# Curated list of popular distros for the random feature
+RANDOM_DISTROS = [
+    ("Ubuntu", "x86_64"),
+    ("Fedora", "x86_64"),
+    ("Debian", "x86_64"),
+    ("Arch Linux", "x86_64"),
+    ("Linux Mint", "x86_64"),
+    ("Pop!_OS", "x86_64"),
+    ("openSUSE Tumbleweed", "x86_64"),
+    ("NixOS", "x86_64"),
+    ("Kali Linux", "x86_64"),
+    ("AlmaLinux", "x86_64"),
+    ("Rocky Linux", "x86_64"),
+]
+
+
+def setup_logging(verbose: bool = False) -> None:
+    """Configure logging.
+
+    - Always writes full INFO logs to transaction_log.txt
+    - Console (StreamHandler) only receives logs when --verbose is used.
+    """
+    # Remove any existing handlers (in case of re-runs in same process)
+    root_logger = logging.getLogger()
+    root_logger.handlers.clear()
+    root_logger.setLevel(logging.INFO)
+
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+
+    # Always log everything to the file
+    file_handler = logging.FileHandler('transaction_log.txt')
+    file_handler.setLevel(logging.INFO)
+    file_handler.setFormatter(formatter)
+    root_logger.addHandler(file_handler)
+
+    if verbose:
+        # Verbose mode: also show INFO+ on the terminal
+        stream_handler = logging.StreamHandler()
+        stream_handler.setLevel(logging.INFO)
+        stream_handler.setFormatter(formatter)
+        root_logger.addHandler(stream_handler)
+    # else: console stays quiet (only errors/warnings if we add them later)
 
 # Rich console for beautiful terminal output
 console = Console()
@@ -65,7 +98,7 @@ def save_history(history, new_entry):
     logging.info(f"Saved new entry to history: {new_entry}")
 
 def validate_inputs(args):
-    """Validate CLI arguments.
+    """Validate CLI arguments (level only — distro/arch are guaranteed by main()).
 
     Args:
         args (argparse.Namespace): Parsed arguments.
@@ -73,12 +106,8 @@ def validate_inputs(args):
     Raises:
         ValueError: If validation fails.
     """
-    if not args.distro:
-        raise ValueError("Distribution name is required.")
-    if not args.arch:
-        raise ValueError("Architecture is required.")
-    if args.level and args.level not in ['beginner', 'intermediate', 'advanced']:
-        raise ValueError("Expertise level must be one of: beginner, intermediate, advanced.")
+    if args.level and args.level not in ['beginner', 'intermediate', 'advanced', 'general']:
+        raise ValueError("Expertise level must be one of: beginner, intermediate, advanced (or omit for general).")
     logging.info("Inputs validated successfully.")
 
 def build_prompt(args):
@@ -177,12 +206,34 @@ def run_agent(prompt, api_key):
 
 def main():
     """Main function to parse args, run agent, and handle logging/history."""
-    parser = argparse.ArgumentParser(description="CLI app for Linux distro info using AI agent.")
-    parser.add_argument('--distro', type=str, required=True, help='Linux distribution name (e.g., Ubuntu)')
-    parser.add_argument('--arch', type=str, required=True, help='Architecture (e.g., x86_64)')
-    parser.add_argument('--level', type=str, choices=['beginner', 'intermediate', 'advanced'], help='Expertise level')
+    parser = argparse.ArgumentParser(
+        description="CLI app for Linux distro info using AI agent. "
+                    "Run with no arguments to explore a random popular distribution."
+    )
+    parser.add_argument('--distro', type=str, help='Linux distribution name (e.g., Ubuntu). If omitted, a random distro is chosen.')
+    parser.add_argument('--arch', type=str, help='Architecture (e.g., x86_64). Defaults to x86_64 when using random mode.')
+    parser.add_argument('--level', type=str, choices=['beginner', 'intermediate', 'advanced', 'general'], help='Expertise level (omit or use "general" for a balanced response)')
     parser.add_argument('--topics', type=str, help='Comma-separated topics (e.g., features,package_management)')
+    parser.add_argument('-v', '--verbose', action='store_true', help='Show detailed logs on the console (INFO level)')
     args = parser.parse_args()
+
+    # --- Random mode when no distro is provided ---
+    random_mode = False
+    if not args.distro:
+        import random
+        random_mode = True
+        distro, arch = random.choice(RANDOM_DISTROS)
+        args.distro = distro
+        args.arch = arch or "x86_64"
+        if not args.level:
+            args.level = "general"
+
+    # Default arch if user gave only --distro
+    if args.distro and not args.arch:
+        args.arch = "x86_64"
+
+    # Set up logging *after* we know the verbose flag
+    setup_logging(verbose=args.verbose)
 
     try:
         validate_inputs(args)
@@ -194,6 +245,18 @@ def main():
         if not api_key:
 #            raise ValueError("GROQ_API_KEY environment variable not set.")
             raise ValueError("XAI_API_KEY environment variable not set.")
+
+        # Friendly message when we picked a random distro
+        if random_mode:
+            hint = "" if args.verbose else "\n    (use --verbose to see internal logs)"
+            random_msg = Text.assemble(
+                ("🎲  No arguments given — randomly exploring ", "bold yellow"),
+                (args.distro, "bold cyan"),
+                (f" ({args.arch})", "dim"),
+                (hint, "dim italic"),
+            )
+            console.print(Panel(random_msg, border_style="yellow", padding=(0, 1)))
+            console.print()
 
         prompt = build_prompt(args)
 
