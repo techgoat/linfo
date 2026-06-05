@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+title: "2026 Linux Info CLI"
+message: "If you use this software, please cite it using the metadata from this file."
+type: software
+authors:
+  - name: "rej1405"
+license: MIT
+version: "0.1.0"
+date-released: "2026-05-28"
+abstract: |
+  An agentic Python CLI application that leverages Grok (via the xAI API) 
+  together with Wikipedia and web search tools to deliver tailored, 
+  up-to-date information about Linux distributions for different expertise 
+  levels and architectures. Features rich terminal output, query history, 
+  and optional random-distro exploration mode.
+repository-code: "https://github.com/rej1405/2026-linux-info"  # Update when published
+url: "https://github.com/rej1405/2026-linux-info"              # Update when published
+keywords:
+  - linux
+  - cli
+  - agentic-ai
+  - grok
+  - xai
+  - distro
+  - rich
+  - langchain
+preferred-citation:
+  type: software
+  title: "2026 Linux Info CLI"
+  authors:
+    - name: "rej1405"
+  year: 2026
+  version: "0.1.0"
+  url: "https://github.com/rej1405/2026-linux-info"
+  license: MIT
+  abstract: |
+    An agentic Python CLI application that leverages Grok (via the xAI API) 
+    together with Wikipedia and web search tools to deliver tailored, 
+    up-to-date information about Linux distributions.

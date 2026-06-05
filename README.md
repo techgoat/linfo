@@ -1,45 +1,107 @@
-# Linux Info CLI (2026)
+# linfo (2026)
 
-A small agentic Python CLI that uses Grok (via xAI) + Wikipedia/DuckDuckGo tools to give tailored, up-to-date information about any Linux distribution and architecture.
+[![Built with Grok Build](https://img.shields.io/badge/Built%20with-Grok%20Build-000000?style=for-the-badge)](https://x.ai)
+
+`linfo` is a small agentic Python CLI that uses Grok (via xAI) + Wikipedia/DuckDuckGo tools to give tailored, up-to-date information about any Linux distribution and architecture.
+
+It can render in **fastfetch/neofetch style** (ASCII logo + key facts + direct download link) or rich Markdown.
 
 ## Current Features
-- Clean, readable output powered by **Rich** (Markdown panels, syntax highlighting, nice headers)
+- Clean, readable output powered by **Rich** (Markdown panels or fastfetch-style columns)
+- `--style fetch|markdown` to choose output format
+- `--brief` for compact fastfetch view only (logo + facts + download when the distro is in the built-in database; otherwise a small "Brief:" header + concise LLM output, no long LLM panel)
+- Random mode (no args) defaults to attractive fastfetch-style with ASCII
+- **neofetch / fastfetch style**: ASCII art logo + key facts (PM, desktop, release model) + prominent **official download link**
+- Reliable official download links (curated per distro)
 - Agentic tool use (the model can search the web + Wikipedia in a loop)
 - Query history saved to `query_history.json`
 - Full transaction logging to `transaction_log.txt`
 - Support for expertise level and custom topics
+- Design follows Arjan Codes principles (SRP, separation of concerns, small dataclasses for Distro + Renderer, and the recommended `src/` project layout) + OWASP secrets + agentic security practices (centralized key handling, limited tool agency, no secret leakage)
+
+## Installation as a uv tool (recommended)
+
+```bash
+# From inside the project directory (after you have the source)
+uv tool install .
+
+# Now the `linfo` command is available globally (managed by uv)
+linfo --help
+linfo   # random distro, fastfetch style by default
+```
+
+After `uv tool install .` you get the `linfo` command in your PATH (uv tools bin dir).
+
+For development / without global install:
+
+```bash
+# Inside the project dir
+uv run linfo                 # uses the project entry point
+# or fall back to
+uv run python linfo.py --help
+```
+
+To reinstall after changes:
+
+```bash
+uv tool install --force .
+```
 
 ## Usage
 
 ```bash
-# After `uv sync`
+# Random distro (defaults to nice fastfetch view + in-depth)
+linfo
 
-# Explore a random popular distribution (recommended quick start)
-uv run python linux-info-v1.py
+# Explicit distro, full markdown panel (classic behavior)
+linfo --distro Debian --arch x86_64 --level beginner
 
-# Specific distribution with rich formatted output
-uv run python linux-info-v1.py \
-  --distro "Debian" \
-  --arch "x86_64" \
-  --level "beginner" \
-  --topics "overview,package management,getting started"
+# Force fastfetch style (even for explicit)
+linfo --distro Fedora --style fetch
 
-# Show all internal logs (tool calls, history saving, etc.)
-uv run python linux-info-v1.py --distro Fedora --verbose
-# or short form:
-uv run python linux-info-v1.py -v --distro Arch
+# Brief / compact mode (logo + facts + download only for known distros; for others a compact summary header + concise LLM info, no large "In-Depth" panel)
+linfo --brief
+linfo --distro Arch --brief
+linfo --distro "Linux Mint" --style fetch --brief
+
+# Works for any distro (even ones not in the built-in fastfetch database)
+linfo --distro "Parrot Security" --brief
+linfo --distro "Parrot Security" --style fetch  # same as brief for unknown distros in terms of avoiding full panel
+
+# With verbose logging
+linfo -v
+linfo --distro Ubuntu --verbose
 ```
 
 **New in this version:**
-- Running the app with **no arguments** automatically picks a random well-known Linux distribution (from a curated list) and gives you information about it.
+- App is now installed as the `linfo` command via `uv tool install .`
+- `--style fetch|markdown` flag for full control of output format.
+- `--brief` flag for the compact fastfetch-style only (perfect for quick lookup; gracefully handles arbitrary distros with a compact summary).
+- Random (no args) still defaults to the attractive fastfetch display.
+- Official download links always prominent.
+- Uses small `Distro` and `DistroRenderer` dataclasses internally.
 - By default the terminal stays clean — detailed logs only appear when you pass `--verbose` / `-v`. Everything is still written to `transaction_log.txt`.
 
-The output appears in a nicely formatted bordered panel with proper headings, lists, and code formatting.
+The output appears in a nicely formatted bordered panel (or fastfetch-style columns) with proper headings, lists, and code formatting. Download links are always easy to find.
 
 **Requirements:**
 - `XAI_API_KEY` in `.env` (or environment)
 - Python 3.14+
-- `uv sync` to install dependencies (including `rich`)
+- `uv` (the uv tool manager handles installation of linfo and its deps)
+
+## License
+
+This project is released under the [MIT License](LICENSE).
+
+## Acknowledgements
+
+This project was developed with significant assistance from **Grok Build** by xAI.
+
+## Citation
+
+If you use or reference this software in academic work, please cite it using the metadata in [CITATION.cff](CITATION.cff).
+
+A preferred citation is also included in that file.
 
 ---
 
@@ -100,7 +162,7 @@ Design Overview
 -   Docstrings: Included on all functions.
 -   Structure:
     -   Main script: distro_info.py
-    -   Runs as `uv run python linux-info-v1.py` (random distro) or with explicit `--distro` / `--arch` flags. Use `-v`/`--verbose` for full logs.
+    -   Runs as `linfo` (after `uv tool install .`) or `uv run linfo` (random distro) or with explicit `--distro` / `--arch` flags. Use `-v`/`--verbose` for full logs. New flags: --style, --brief.
     -   Output: Prints tailored info; logs everything.
 
 -   Dependencies: Managed with `uv`. See `pyproject.toml` (includes langchain, langchain-openai, rich, duckduckgo-search, wikipedia, etc.). Requires `XAI_API_KEY`.

@@ -3,35 +3,6 @@ revision = 3
 requires-python = ">=3.14"
 
 [[package]]
-name = "2026-linux-info"
-version = "0.1.0"
-source = { virtual = "." }
-dependencies = [
-    { name = "ddgs" },
-    { name = "duckduckgo-search" },
-    { name = "langchain" },
-    { name = "langchain-community" },
-    { name = "langchain-groq" },
-    { name = "langchain-openai" },
-    { name = "python-dotenv" },
-    { name = "rich" },
-    { name = "wikipedia" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "ddgs", specifier = ">=7.0.0" },
-    { name = "duckduckgo-search", specifier = ">=8.1.1" },
-    { name = "langchain", specifier = ">=1.2.6" },
-    { name = "langchain-community", specifier = ">=0.4.1" },
-    { name = "langchain-groq", specifier = ">=1.1.1" },
-    { name = "langchain-openai", specifier = ">=0.2.0" },
-    { name = "python-dotenv", specifier = ">=1.0.0" },
-    { name = "rich", specifier = ">=13.9.0" },
-    { name = "wikipedia", specifier = ">=1.4.0" },
-]
-
-[[package]]
 name = "aiohappyeyeballs"
 version = "2.6.1"
 source = { registry = "https://pypi.org/simple" }
@@ -766,6 +737,35 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/e7/85/9c7933052a997da1b85bc5c774f3865e9b1da1c8d71541ea133178b13229/langsmith-0.6.4.tar.gz", hash = "sha256:36f7223a01c218079fbb17da5e536ebbaf5c1468c028abe070aa3ae59bc99ec8", size = 919964, upload-time = "2026-01-15T20:02:28.873Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/66/0f/09a6637a7ba777eb307b7c80852d9ee26438e2bdafbad6fcc849ff9d9192/langsmith-0.6.4-py3-none-any.whl", hash = "sha256:ac4835860160be371042c7adbba3cb267bcf8d96a5ea976c33a8a4acad6c5486", size = 283503, upload-time = "2026-01-15T20:02:26.662Z" },
+]
+
+[[package]]
+name = "linfo"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "ddgs" },
+    { name = "duckduckgo-search" },
+    { name = "langchain" },
+    { name = "langchain-community" },
+    { name = "langchain-groq" },
+    { name = "langchain-openai" },
+    { name = "python-dotenv" },
+    { name = "rich" },
+    { name = "wikipedia" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "ddgs", specifier = ">=7.0.0" },
+    { name = "duckduckgo-search", specifier = ">=8.1.1" },
+    { name = "langchain", specifier = ">=1.2.6" },
+    { name = "langchain-community", specifier = ">=0.4.1" },
+    { name = "langchain-groq", specifier = ">=1.1.1" },
+    { name = "langchain-openai", specifier = ">=0.2.0" },
+    { name = "python-dotenv", specifier = ">=1.0.0" },
+    { name = "rich", specifier = ">=13.9.0" },
+    { name = "wikipedia", specifier = ">=1.4.0" },
 ]
 
 [[package]]

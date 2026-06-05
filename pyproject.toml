@@ -1,8 +1,9 @@
 [project]
-name = "2026-linux-info"
+name = "linfo"
 version = "0.1.0"
-description = "Linux Information lookup applicaten"
+description = "linfo - Linux distro info CLI with fastfetch-style output and LLM details"
 readme = "README.md"
+license = { text = "MIT" }
 requires-python = ">=3.14"
 dependencies = [
     "ddgs>=7.0.0",
@@ -15,3 +16,13 @@ dependencies = [
     "rich>=13.9.0",
     "wikipedia>=1.4.0",
 ]
+
+[project.scripts]
+linfo = "linfo.__main__:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/linfo"]
