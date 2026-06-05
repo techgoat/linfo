@@ -51,7 +51,10 @@ load_dotenv()
 # )
 
 
-HISTORY_FILE = 'query_history.json'
+LOGS_DIR = "logs"
+os.makedirs(LOGS_DIR, exist_ok=True)
+
+HISTORY_FILE = os.path.join(LOGS_DIR, "query_history.json")
 
 # Curated list of popular distros for the random feature
 RANDOM_DISTROS = [
@@ -479,7 +482,7 @@ class DistroRenderer:
 def setup_logging(verbose: bool = False) -> None:
     """Configure logging.
 
-    - Always writes full INFO logs to transaction_log.txt
+    - Always writes full INFO logs to logs/transaction_log.txt
     - Console (StreamHandler) only receives logs when --verbose is used.
     """
     # Remove any existing handlers (in case of re-runs in same process)
@@ -489,8 +492,9 @@ def setup_logging(verbose: bool = False) -> None:
 
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
-    # Always log everything to the file
-    file_handler = logging.FileHandler('transaction_log.txt')
+    # Always log everything to the file in the logs subfolder
+    log_path = os.path.join(LOGS_DIR, "transaction_log.txt")
+    file_handler = logging.FileHandler(log_path)
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(formatter)
     root_logger.addHandler(file_handler)
@@ -503,7 +507,7 @@ def setup_logging(verbose: bool = False) -> None:
         root_logger.addHandler(stream_handler)
     # else: console stays quiet (only errors/warnings if we add them later)
 
-def load_history():
+def load_history() -> list:
     """Load past queries from JSON file.
 
     Returns:
@@ -514,7 +518,7 @@ def load_history():
             return json.load(f)
     return []
 
-def save_history(history, new_entry):
+def save_history(history: list, new_entry: dict) -> None:
     """Append new query to history and save to JSON.
 
     Args:
@@ -526,7 +530,7 @@ def save_history(history, new_entry):
         json.dump(history, f, indent=4)
     logging.info(f"Saved new entry to history: {new_entry}")
 
-def validate_inputs(args):
+def validate_inputs(args: argparse.Namespace) -> None:
     """Validate CLI arguments (level only — distro/arch are guaranteed by main()).
 
     Args:
@@ -539,7 +543,7 @@ def validate_inputs(args):
         raise ValueError("Expertise level must be one of: beginner, intermediate, advanced (or omit for general).")
     logging.info("Inputs validated successfully.")
 
-def build_prompt(args, brief: bool = False):
+def build_prompt(args, brief: bool = False) -> str:
     """Build the agent prompt based on arguments.
 
     Args:

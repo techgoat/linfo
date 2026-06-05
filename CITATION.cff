@@ -5,7 +5,7 @@ type: software
 authors:
   - name: "rej1405"
 license: MIT
-version: "0.1.0"
+version: "0.5.0"
 date-released: "2026-05-28"
 abstract: |
   An agentic Python CLI application that leverages Grok (via the xAI API) 
@@ -30,7 +30,7 @@ preferred-citation:
   authors:
     - name: "rej1405"
   year: 2026
-  version: "0.1.0"
+  version: "0.5.0"
   url: "https://github.com/rej1405/2026-linux-info"
   license: MIT
   abstract: |

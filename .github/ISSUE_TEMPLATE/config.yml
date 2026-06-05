@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discussions / Questions
+    url: https://github.com/rej1405/2026-linux-info/discussions
+    about: Please ask and answer questions here instead of opening an issue.
+  - name: Security Vulnerability
+    url: https://github.com/rej1405/2026-linux-info/security/advisories/new
+    about: Please report security issues privately here (do not use public issues).

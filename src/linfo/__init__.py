@@ -5,4 +5,4 @@ for better separation of source code from other project files and to avoid
 import shadowing issues during development.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.5.0"

@@ -14,10 +14,15 @@ It can render in **fastfetch/neofetch style** (ASCII logo + key facts + direct d
 - **neofetch / fastfetch style**: ASCII art logo + key facts (PM, desktop, release model) + prominent **official download link**
 - Reliable official download links (curated per distro)
 - Agentic tool use (the model can search the web + Wikipedia in a loop)
-- Query history saved to `query_history.json`
-- Full transaction logging to `transaction_log.txt`
+- Query history saved to `logs/query_history.json`
+- Full transaction logging to `logs/transaction_log.txt` (logs/ subfolder is created automatically)
 - Support for expertise level and custom topics
 - Design follows Arjan Codes principles (SRP, separation of concerns, small dataclasses for Distro + Renderer, and the recommended `src/` project layout) + OWASP secrets + agentic security practices (centralized key handling, limited tool agency, no secret leakage)
+- Includes `tests/` with pytest cases (run via `uv run --extra test pytest`) covering input validation, Distro/DistroRenderer, --brief/--style paths, logging/history to subfolder, etc.
+- Full documentation site powered by **MkDocs + Material + mkdocstrings** (in `docs/`, including architecture overview and auto-generated API reference). Run `uv run --extra docs mkdocs serve`.
+- `examples/` with CLI and programmatic use-cases.
+- Professional release hygiene: `CHANGELOG.md` (Keep a Changelog + SemVer), `CODE_OF_CONDUCT.md` (Contributor Covenant), `.github/ISSUE_TEMPLATE/` and `PULL_REQUEST_TEMPLATE.md`.
+- Project-specific AI guardrails in `.grok/AGENTS.md` and `.grok/skills/linfo/SKILL.md` (Arjan Codes + OWASP; auto-activated in the tree).
 
 ## Installation as a uv tool (recommended)
 
@@ -80,7 +85,7 @@ linfo --distro Ubuntu --verbose
 - Random (no args) still defaults to the attractive fastfetch display.
 - Official download links always prominent.
 - Uses small `Distro` and `DistroRenderer` dataclasses internally.
-- By default the terminal stays clean — detailed logs only appear when you pass `--verbose` / `-v`. Everything is still written to `transaction_log.txt`.
+- By default the terminal stays clean — detailed logs only appear when you pass `--verbose` / `-v`. Everything is still written to `logs/transaction_log.txt`.
 
 The output appears in a nicely formatted bordered panel (or fastfetch-style columns) with proper headings, lists, and code formatting. Download links are always easy to find.
 
@@ -88,6 +93,10 @@ The output appears in a nicely formatted bordered panel (or fastfetch-style colu
 - `XAI_API_KEY` in `.env` (or environment)
 - Python 3.14+
 - `uv` (the uv tool manager handles installation of linfo and its deps)
+
+**Documentation**: Full site at `docs/` (MkDocs). Build locally with `uv run --extra docs mkdocs serve` after installing the docs extra. See `docs/architecture.md` for design details and guardrails.
+
+**Versioning**: Follows Semantic Versioning (SemVer) + PEP 440. See `CHANGELOG.md` for the policy and history. Current: see `pyproject.toml` or `python -c "import linfo; print(linfo.__version__)"`.
 
 ## License
 
