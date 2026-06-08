@@ -1,9 +1,12 @@
 cff-version: 1.2.0
-title: "2026 Linux Info CLI"
+title: "linfo"
 message: "If you use this software, please cite it using the metadata from this file."
 type: software
 authors:
-  - name: "rej1405"
+  - given-names: "Roy"
+    family-names: "Jensen"
+    email: "g04t@t3chg04t.wtf"
+    orcid: "https://orcid.org/0009-0001-2601-8028"
 license: MIT
 version: "0.5.0"
 date-released: "2026-05-28"
@@ -13,8 +16,8 @@ abstract: |
   up-to-date information about Linux distributions for different expertise 
   levels and architectures. Features rich terminal output, query history, 
   and optional random-distro exploration mode.
-repository-code: "https://github.com/rej1405/2026-linux-info"  # Update when published
-url: "https://github.com/rej1405/2026-linux-info"              # Update when published
+repository-code: "https://github.com/techgoat/linfo"  # Update when published
+url: "https://github.com/techgoat/linfo"              # Update when published
 keywords:
   - linux
   - cli
@@ -26,12 +29,15 @@ keywords:
   - langchain
 preferred-citation:
   type: software
-  title: "2026 Linux Info CLI"
+  title: "linfo"
   authors:
-    - name: "rej1405"
+    - given-names: "Roy"
+      family-names: "Jensen"
+      email: "g04t@t3chg04t.wtf"
+      orcid: "https://orcid.org/0009-0001-2601-8028"
   year: 2026
   version: "0.5.0"
-  url: "https://github.com/rej1405/2026-linux-info"
+  url: "https://github.com/techgoat/linfo"
   license: MIT
   abstract: |
     An agentic Python CLI application that leverages Grok (via the xAI API) 

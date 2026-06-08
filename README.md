@@ -6,6 +6,8 @@
 
 It can render in **fastfetch/neofetch style** (ASCII logo + key facts + direct download link) or rich Markdown.
 
+**Author:** Roy Jensen ([0009-0001-2601-8028](https://orcid.org/0009-0001-2601-8028)) — [g04t@t3chg04t.wtf](mailto:g04t@t3chg04t.wtf)
+
 ## Current Features
 - Clean, readable output powered by **Rich** (Markdown panels or fastfetch-style columns)
 - `--style fetch|markdown` to choose output format

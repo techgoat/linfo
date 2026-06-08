@@ -7,6 +7,9 @@ linfo - Linux distro info CLI (fastfetch-style + rich LLM details).
 An agentic CLI tool for retrieving tailored information about Linux distributions.
 Developed with assistance from Grok Build (xAI).
 
+Author: Roy Jensen <g04t@t3chg04t.wtf>
+ORCID: https://orcid.org/0009-0001-2601-8028
+
 Design notes (Arjan Codes inspired):
 - Single Responsibility: separate concerns for data (DISTRO_DATA), rendering
   (DistroRenderer dataclass), agent orchestration (run_agent), secrets (_get_api_key).
