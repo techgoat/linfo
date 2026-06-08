@@ -33,6 +33,8 @@ linfo --distro "Parrot Security" --style markdown --level intermediate
 
 See [Usage](usage.md) and the `examples/` directory (at project root) for more.
 
+Future plans live in the root [`ROADMAP.md`](../ROADMAP.md). Very early or personal brainstorming can go in the `.future/` directory.
+
 ## Project Principles
 
 This project strictly follows:

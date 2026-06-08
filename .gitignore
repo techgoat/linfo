@@ -21,3 +21,8 @@ wheels/
 # Runtime logs and history (keep the directory via .gitkeep)
 logs/
 !logs/.gitkeep
+
+# Personal future ideas scratchpad (most content can stay private)
+.future/
+!.future/.gitkeep
+!.future/README.md

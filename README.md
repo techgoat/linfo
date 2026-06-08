@@ -23,6 +23,7 @@ It can render in **fastfetch/neofetch style** (ASCII logo + key facts + direct d
 - `examples/` with CLI and programmatic use-cases.
 - Professional release hygiene: `CHANGELOG.md` (Keep a Changelog + SemVer), `CODE_OF_CONDUCT.md` (Contributor Covenant), `.github/ISSUE_TEMPLATE/` and `PULL_REQUEST_TEMPLATE.md`.
 - Project-specific AI guardrails in `.grok/AGENTS.md` and `.grok/skills/linfo/SKILL.md` (Arjan Codes + OWASP; auto-activated in the tree).
+- Future ideas are tracked publicly in `ROADMAP.md`, with a personal scratchpad in the `.future/` directory.
 
 ## Installation as a uv tool (recommended)
 
