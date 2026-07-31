@@ -1,6 +1,6 @@
 site_name: linfo
 site_description: linfo - Linux distro info CLI with fastfetch-style output and LLM details
-repo_url: https://github.com/rej1405/2026-linux-info  # update when published
+repo_url: https://github.com/techgoat/linfo
 edit_uri: edit/main/docs/
 
 theme:

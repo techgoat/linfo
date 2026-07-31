@@ -1,4 +1,4 @@
-# FIle of Sensitive API Keys
+# File of Sensitive API Keys
 .env
 
 # Grok local project config (per user setup in separate chat)
@@ -7,6 +7,7 @@
 !.grok/AGENTS.md
 !.grok/skills/**/SKILL.md
 !.grok/skills/**/AGENTS.md
+
 # Python-generated files
 __pycache__/
 *.py[oc]
@@ -26,3 +27,20 @@ logs/
 .future/
 !.future/.gitkeep
 !.future/README.md
+
+# MkDocs build output (build with: uv run --extra docs mkdocs build)
+site/
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Test / coverage caches
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/

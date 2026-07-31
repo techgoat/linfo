@@ -12,42 +12,13 @@ It is intentionally high-level and speculative. Concrete work is tracked in GitH
 
 ## High Priority / Near-term Ideas
 
-### `--embedded` / Embedded & IoT Focused Mode
-Support for Linux distributions and build systems commonly used in embedded, IoT, and appliance scenarios.
+### `--embedded` / Embedded & IoT Focused Mode — **Shipped in 0.6.0**
+Initial support landed in **v0.6.0**:
+- `linfo --embedded` with `EMBEDDED_DISTRO_DATA`, embedded fetch facts, tailored prompts, embedded random pool.
+- Further polish (more boards, better ASCII, Yocto layer tips) can still land in follow-ups.
 
-**Motivation**
-- Many users work with resource-constrained or specialized environments (routers, industrial devices, single-board computers, containers, etc.).
-- These systems often use very different tooling than desktop/server distros.
-
-**Examples of target systems**
-- Yocto Project / OpenEmbedded
-- Buildroot
-- BusyBox-based minimal systems
-- OpenWrt / LEDE
-- Alpine (in embedded contexts)
-- Raspberry Pi OS Lite / custom embedded images
-- balenaOS, ResinOS-style appliance OSes
-
-**Possible behaviors**
-- `linfo --embedded` (or `--style embedded`)
-- Different / additional facts in the fastfetch-style view:
-  - Target architecture / SoC families
-  - Build system (Yocto layer, Buildroot defconfig, etc.)
-  - Image size / footprint
-  - Init system (BusyBox, systemd, OpenRC, etc.)
-  - Package / update mechanism (opkg, rpm-ostree, swupdate, etc.)
-  - Common use cases (gateway, HMI, headless, etc.)
-- Tailored LLM prompts that emphasize build-time vs runtime concerns, cross-compilation, licensing (for Yocto), etc.
-- Possibly special handling or links to documentation for the major build systems.
-
-**Rough implementation notes**
-- Extend `DISTRO_DATA` with new categories or a separate `EMBEDDED_DISTRO_DATA`.
-- Add new facts keys (e.g. `build_system`, `typical_footprint`, `common_targets`).
-- Consider a dedicated ASCII style or icon set for embedded systems.
-- Update `build_prompt` to produce different emphasis when the flag is present.
-- Add to `DistroRenderer` logic.
-
-**Potential version target**: 0.6.0 or 0.7.0 (after the current documentation/examples wave stabilizes).
+### `--json` — **Shipped in 0.6.0**
+Machine-readable stdout via `linfo --json` (see `linfo.output.build_result_payload`).
 
 ### `--smallbase` / Minimal / Lightweight Distros
 Better support and presentation for very small, resource-friendly distributions.
@@ -89,12 +60,14 @@ Better support and presentation for very small, resource-friendly distributions.
 - Better support for rolling vs point-release characteristics in the output.
 - Integration with DistroWatch or other data sources (with proper caching/respect for rate limits).
 - `--compare` mode (e.g. `linfo --compare Ubuntu Fedora` or between two architectures of the same distro).
-- Machine-readable output (`--json`, `--yaml`) for scripting / embedding in other tools.
+- `--yaml` as a sibling to `--json`.
 - Caching of LLM responses or tool results (with user control and privacy considerations).
 - Theming / color scheme options for the Rich output.
 - Support for non-x86_64 / non-aarch64 architectures more explicitly in the fastfetch view.
 - A TUI mode (using Textual or similar) for interactive exploration.
 - First-class support for container / immutable / atomic distros (Fedora Silverblue, NixOS, etc.) with special facts.
+- Offline/static-only mode (skip LLM when curated data is enough, e.g. `--brief` + known distro).
+- History opt-out (`--no-history`) for shared machines.
 
 ## How to Propose or Prioritize Ideas
 

@@ -8,6 +8,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-07-31
+
+### Added
+- **`--json`**: Machine-readable JSON on stdout for scripting (stable payload with name, arch, flags, static_data without ASCII blob, response).
+- **`--embedded`**: Embedded/IoT profile — embedded static database (Alpine, OpenWrt, Yocto, Buildroot, BusyBox, Raspberry Pi OS Lite, balenaOS), tailored LLM prompts (build system, footprint, init, OTA), embedded-oriented fetch facts, and a dedicated random pool when no `--distro` is given.
+- **`--model`**: Optional xAI model override (also respects `XAI_MODEL` env).
+- **Module split** under `src/linfo/`: `data`, `models`, `renderer`, `agent`, `secrets`, `history`, `output`, thin `main` orchestration (Arjan SRP).
+- **GitHub Actions CI** (`.github/workflows/ci.yml`) running pytest on Python 3.12–3.14.
+- Minimal **pre-commit** config (trailing whitespace, YAML, large files).
+
+### Fixed
+- Restore **`ddgs`** dependency required by LangChain's `DuckDuckGoSearchRun` (without it: "Please install it with pip install -U ddgs"). Prefer `ddgs` over the older `duckduckgo-search` package name.
+
+### Changed
+- **Repo hygiene**: `site/` and `.idea/` no longer tracked; gitignored. Root `main.py` is a real shim to `linfo.main`. CHANGELOG/README/mkdocs URLs point at `https://github.com/techgoat/linfo`.
+- **Dependencies**: Dropped unused `langchain-groq`. Web search tool depends on **`ddgs`**. `requires-python` relaxed to `>=3.12` for broader installability.
+- Public package re-exports from `linfo` (`Distro`, `DistroRenderer`, helpers).
+- Version bumped to **0.6.0**.
+
+### Documentation
+- README, usage, architecture, examples, ROADMAP, CITATION.cff updated for `--json` / `--embedded` and new module layout.
+
 ## [0.5.0] - 2025-06-05
 
 ### Added
@@ -77,7 +99,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **We follow Semantic Versioning (SemVer 2.0.0)**: https://semver.org/
 
 - **MAJOR** (e.g. 1.0.0): Incompatible / breaking changes (public API, behavior that would surprise existing users, major refactors that change CLI contract).
-- **MINOR** (e.g. 0.5.0): Backwards-compatible new features (new flags like --style/--brief, new documentation systems, new examples, added distros to DB, new guardrails files).
+- **MINOR** (e.g. 0.6.0): Backwards-compatible new features (new flags like --style/--brief/--json/--embedded, new documentation systems, new examples, added distros to DB, new guardrails files).
 - **PATCH** (e.g. 0.4.1): Backwards-compatible bug fixes and small improvements.
 
 **Python Packaging Note (PEP 440)**: We use `major.minor.patch` compatible with PEP 440. Pre-releases use `0.5.0a1`, `0.5.0rc1`, etc. (no hyphens in public versions).
@@ -94,10 +116,10 @@ See full discussion in the research section of development notes and `.grok/AGEN
 
 ## Links
 
-[Unreleased]: https://github.com/rej1405/2026-linux-info/compare/v0.5.0...HEAD
-[0.5.0]: https://github.com/rej1405/2026-linux-info/releases/tag/v0.5.0
-(Previous tags will be added as releases are cut.)
+[Unreleased]: https://github.com/techgoat/linfo/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/techgoat/linfo/releases/tag/v0.6.0
+[0.5.0]: https://github.com/techgoat/linfo/releases/tag/v0.5.0
 
 ---
 
-*This changelog was initialized and populated based on the full conversation history of refinements to the linfo project.*
+*This changelog was initialized and populated based on the full conversation history of the linfo project.*
