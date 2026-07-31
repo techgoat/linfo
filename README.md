@@ -3,7 +3,7 @@
 [![Built with Grok Build](https://img.shields.io/badge/Built%20with-Grok%20Build-000000?style=for-the-badge)](https://x.ai)
 [![CI](https://github.com/techgoat/linfo/actions/workflows/ci.yml/badge.svg)](https://github.com/techgoat/linfo/actions/workflows/ci.yml)
 
-`linfo` is a small agentic Python CLI that uses Grok (via xAI) + Wikipedia/DuckDuckGo tools to give tailored, up-to-date information about any Linux distribution and architecture.
+`linfo` is a small Python CLI for Linux distro info. By default it is **agentic**: Grok via **xAI** (or another OpenAI-compatible provider) plus Wikipedia/DuckDuckGo tools. It also supports **`--offline`** static-only mode with **no API key**.
 
 It can render in **fastfetch/neofetch style** (ASCII logo + key facts + direct download link), rich Markdown, or **JSON** for scripts. An **`--embedded`** profile targets IoT/appliance/build-system concerns.
 
@@ -17,7 +17,10 @@ It can render in **fastfetch/neofetch style** (ASCII logo + key facts + direct d
 - `--brief` for compact fastfetch view only (logo + facts + download when the distro is in the built-in database; otherwise a small "Brief:" header + concise LLM output, no long LLM panel)
 - `--embedded` for embedded/IoT focus (build system, footprint, init, updates, targets + tailored prompts)
 - `--json` for machine-readable stdout (scripting / pipelines)
-- `--model` / `XAI_MODEL` to select the xAI model (default `grok-4`)
+- **`--offline` / `--non-agentic`**: curated static data only — no LLM, no API key (privacy / air-gapped laptops)
+- **Auto-offline** when no provider API key is configured (override with `--force-agentic`)
+- **Multi-provider LLM**: `--provider xai|openai|groq|openrouter|ollama|custom` (default **xai**)
+- Key chain e.g. for xAI: `XAI_API_KEY` → `AI_API_KEY` → `LINFO_API_KEY`; model via `--model` / `XAI_MODEL` / `LINFO_LLM_MODEL`
 - Random mode (no args) defaults to attractive fastfetch-style with ASCII; with `--embedded`, picks from an embedded-oriented pool
 - **neofetch / fastfetch style**: ASCII art logo + key facts + prominent **official download link**
 - Reliable official download links (curated per distro)
@@ -25,7 +28,7 @@ It can render in **fastfetch/neofetch style** (ASCII logo + key facts + direct d
 - Query history saved to `logs/query_history.json`
 - Full transaction logging to `logs/transaction_log.txt` (logs/ subfolder is created automatically)
 - Support for expertise level and custom topics
-- Modular `src/linfo/` package (`data`, `models`, `renderer`, `agent`, `secrets`, `history`, `output`)
+- Modular `src/linfo/` package (`data`, `models`, `renderer`, `agent`, `providers`, `offline`, `secrets`, `history`, `output`)
 - Design follows Arjan Codes principles (SRP, separation of concerns, small dataclasses) + OWASP secrets + agentic security practices
 - Includes `tests/` with pytest (run via `uv run --extra test pytest`)
 - Full documentation site powered by **MkDocs + Material + mkdocstrings** (`uv run --extra docs mkdocs serve`)
@@ -89,7 +92,18 @@ linfo --distro "Yocto Project" --embedded --level advanced
 linfo --distro Ubuntu --brief --json
 linfo --distro Alpine --embedded --json | jq .static_data.build_system
 
-# Works for any distro (even ones not in the built-in databases)
+# Offline / no API key (static curated data only)
+linfo --offline --distro Ubuntu --brief
+linfo --offline --distro OpenWrt --embedded --json
+linfo --non-agentic --distro Fedora   # alias of --offline
+
+# Other LLM providers (OpenAI-compatible)
+linfo --provider openai --distro Debian --brief
+linfo --provider ollama --model llama3.2 --distro Ubuntu
+export LINFO_LLM_PROVIDER=groq
+export GROQ_API_KEY=...
+
+# Works for any distro in agentic mode (even ones not in the built-in databases)
 linfo --distro "Parrot Security" --brief
 
 # With verbose logging
@@ -97,8 +111,22 @@ linfo -v
 linfo --distro Ubuntu --verbose
 ```
 
+### LLM providers & keys
+
+| Provider | Default model | API key env (first match wins) |
+|----------|---------------|--------------------------------|
+| **xai** (default) | `grok-4` | `XAI_API_KEY`, `AI_API_KEY`, `LINFO_API_KEY` |
+| openai | `gpt-4o-mini` | `OPENAI_API_KEY`, `AI_API_KEY`, `LINFO_API_KEY` |
+| groq | `llama-3.3-70b-versatile` | `GROQ_API_KEY`, `AI_API_KEY`, `LINFO_API_KEY` |
+| openrouter | `openai/gpt-4o-mini` | `OPENROUTER_API_KEY`, `AI_API_KEY`, `LINFO_API_KEY` |
+| ollama | `llama3.2` | optional (`OLLAMA_API_KEY` / generic); local `http://127.0.0.1:11434/v1` |
+| custom | (set model) | `AI_API_KEY` / `LINFO_API_KEY` + **`LINFO_LLM_BASE_URL`** or `--base-url` |
+
+Also: `LINFO_LLM_PROVIDER`, `LINFO_LLM_MODEL`, `LINFO_LLM_BASE_URL` (and `AI_PROVIDER` / `AI_MODEL` / `AI_BASE_URL` aliases).
+
 **Requirements:**
-- `XAI_API_KEY` in `.env` (or environment)
+- For **agentic** mode: a key for your provider (default: `XAI_API_KEY` for xAI)
+- For **offline** mode: no key required (known distros only)
 - Python 3.12+
 - `uv` (recommended)
 

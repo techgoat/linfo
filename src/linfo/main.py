@@ -4,16 +4,17 @@ src/linfo/main.py
 
 linfo - Linux distro info CLI (fastfetch-style + rich LLM details).
 
-Thin orchestration layer: argparse, random mode, agent call, render / JSON.
+Thin orchestration layer: argparse, random mode, offline/agent paths, render / JSON.
 
 Author: Roy Jensen <g04t@t3chg04t.wtf>
 ORCID: https://orcid.org/0009-0001-2601-8028
 
 Design notes (Arjan Codes inspired):
-- Single Responsibility: data, models, renderer, agent, secrets, history, output
-  live in focused modules; main() only wires them together.
+- Single Responsibility: data, models, renderer, agent, providers, secrets,
+  history, output, offline live in focused modules; main() only wires them.
 - Security (OWASP Secrets + LLM Agentic): API keys never hardcoded, never logged,
-  fetched just-in-time via get_api_key. Tools are read-only. Limited agency.
+  resolved via providers key chain. Tools are read-only. Limited agency.
+- Offline / non-agentic mode needs no key and never calls the LLM.
 - Project uses the recommended `src/` layout.
 
 MIT License — see LICENSE file for details.
@@ -47,7 +48,16 @@ from linfo.history import (
     setup_logging,
 )
 from linfo.models import Distro
+from linfo.offline import build_static_summary, offline_missing_data_message
 from linfo.output import build_result_payload, emit_json
+from linfo.providers import (
+    DEFAULT_PROVIDER,
+    has_usable_credentials,
+    list_provider_ids,
+    provider_help_text,
+    resolve_llm_config,
+    resolve_provider_id,
+)
 from linfo.renderer import DistroRenderer, console
 from linfo.secrets import get_api_key, _get_api_key  # noqa: F401
 
@@ -77,12 +87,13 @@ def validate_inputs(args: argparse.Namespace) -> None:
 
 
 def main() -> None:
-    """Main function to parse args, run agent, and handle logging/history."""
+    """Main function to parse args, run agent or offline path, handle logging/history."""
     parser = argparse.ArgumentParser(
         description=(
             "linfo - Linux distro info CLI. "
             "Run with no arguments to explore a random popular distribution "
-            "(fastfetch style)."
+            "(fastfetch style). Default LLM provider is xAI; use --offline "
+            "for static-only mode without an API key."
         )
     )
     parser.add_argument(
@@ -118,8 +129,8 @@ def main() -> None:
         default=None,
         help=(
             'Output style: "fetch" for neofetch/fastfetch-style '
-            '(ASCII + facts + download), "markdown" for full LLM panel. '
-            "Defaults to fetch for random runs, markdown otherwise."
+            '(ASCII + facts + download), "markdown" for full LLM/static panel. '
+            "Defaults to fetch for random/offline/embedded, markdown otherwise."
         ),
     )
     parser.add_argument(
@@ -127,8 +138,8 @@ def main() -> None:
         action="store_true",
         help=(
             "Show only the compact fastfetch-style view (logo + key facts + download "
-            'for known distros; for others: small "Brief:" header + concise LLM info). '
-            "Skips the full in-depth LLM panel. Implies --style fetch."
+            'for known distros; for others: small "Brief:" header + concise info). '
+            "Skips the full in-depth panel. Implies --style fetch."
         ),
     )
     parser.add_argument(
@@ -144,15 +155,49 @@ def main() -> None:
         "--json",
         action="store_true",
         help=(
-            "Emit machine-readable JSON on stdout instead of Rich panels "
-            "(still runs the agent; use for scripting). Decorative banners are suppressed."
+            "Emit machine-readable JSON on stdout instead of Rich panels. "
+            "Decorative banners are suppressed."
         ),
+    )
+    parser.add_argument(
+        "--offline",
+        "--non-agentic",
+        action="store_true",
+        dest="offline",
+        help=(
+            "Static-only mode: no LLM, no API key, no web tools. Uses curated "
+            "DISTRO_DATA / EMBEDDED_DISTRO_DATA. Alias: --non-agentic."
+        ),
+    )
+    parser.add_argument(
+        "--force-agentic",
+        action="store_true",
+        help=(
+            "Require agentic LLM mode; do not auto-fall back to offline when "
+            "no API key is configured. Errors if credentials are missing."
+        ),
+    )
+    parser.add_argument(
+        "--provider",
+        type=str,
+        default=None,
+        choices=list_provider_ids(),
+        help=provider_help_text() + f" Env: LINFO_LLM_PROVIDER (default {DEFAULT_PROVIDER}).",
     )
     parser.add_argument(
         "--model",
         type=str,
         default=None,
-        help="xAI model id (default: env XAI_MODEL or grok-4).",
+        help=(
+            "Model id override (default: provider-specific env or built-in default; "
+            "xAI uses XAI_MODEL / grok-4)."
+        ),
+    )
+    parser.add_argument(
+        "--base-url",
+        type=str,
+        default=None,
+        help="OpenAI-compatible API base URL override (or env LINFO_LLM_BASE_URL).",
     )
     args = parser.parse_args()
 
@@ -177,8 +222,24 @@ def main() -> None:
 
     try:
         validate_inputs(args)
+        if args.offline and args.force_agentic:
+            raise ValueError("Cannot combine --offline / --non-agentic with --force-agentic.")
+
         history = load_history()
         logging.info(f"Loaded {len(history)} past queries.")
+
+        provider_id = resolve_provider_id(args.provider)
+        auto_offline = False
+        offline = bool(args.offline)
+
+        if not offline and not args.force_agentic:
+            if not has_usable_credentials(provider_id, base_url=args.base_url):
+                offline = True
+                auto_offline = True
+                logging.info(
+                    "No usable credentials for provider=%s; auto offline mode.",
+                    provider_id,
+                )
 
         if random_mode and not args.json:
             hint = "" if args.verbose else "\n    (use --verbose to see internal logs)"
@@ -195,28 +256,83 @@ def main() -> None:
             console.print(Panel(random_msg, border_style="yellow", padding=(0, 1)))
             console.print()
 
+        if auto_offline and not args.json:
+            notice = Text.assemble(
+                ("Offline mode: ", "bold yellow"),
+                (
+                    f"no API key for provider '{provider_id}'. "
+                    "Using curated static data only (no LLM). "
+                    "Set a provider key (e.g. XAI_API_KEY) or pass --force-agentic to require LLM.",
+                    "dim",
+                ),
+            )
+            console.print(Panel(notice, border_style="yellow", padding=(0, 1)))
+            console.print()
+        elif offline and args.offline and not args.json and not auto_offline:
+            notice = Text.assemble(
+                ("Offline / non-agentic: ", "bold yellow"),
+                ("static curated data only — no LLM, no API key required.", "dim"),
+            )
+            console.print(Panel(notice, border_style="dim yellow", padding=(0, 1)))
+            console.print()
+
         brief = args.brief
         embedded = args.embedded
-        prompt = build_prompt(args, brief=brief, embedded=embedded)
+        distro_obj = Distro.from_args(args)
 
-        if args.json:
-            # Quiet path for scripts: no spinner noise on stdout
-            response = run_agent(prompt, model=args.model)
+        llm_cfg = None
+        response: str | None = None
+
+        if offline:
+            if not distro_obj.data:
+                raise ValueError(
+                    offline_missing_data_message(
+                        args.distro, embedded=embedded
+                    )
+                )
+            response = build_static_summary(distro_obj)
+            # Offline defaults to compact fetch unless user forced markdown
+            if brief is False and args.style is None:
+                brief = True
+            logging.info("Offline static summary length: %s chars", len(response or ""))
         else:
-            with console.status(
-                f"[bold cyan]Querying {args.distro} ({args.arch})...[/bold cyan]",
-                spinner="dots",
-                spinner_style="cyan",
-            ):
-                response = run_agent(prompt, model=args.model)
+            llm_cfg = resolve_llm_config(
+                provider=args.provider,
+                model=args.model,
+                base_url=args.base_url,
+                require_key=True,
+            )
+            prompt = build_prompt(args, brief=brief, embedded=embedded)
+
+            if args.json:
+                response = run_agent(
+                    prompt,
+                    model=args.model,
+                    config=llm_cfg,
+                )
+            else:
+                with console.status(
+                    f"[bold cyan]Querying {args.distro} ({args.arch}) "
+                    f"via {llm_cfg.provider}/{llm_cfg.model}...[/bold cyan]",
+                    spinner="dots",
+                    spinner_style="cyan",
+                ):
+                    response = run_agent(
+                        prompt,
+                        model=args.model,
+                        config=llm_cfg,
+                    )
 
         effective_style = args.style
         if brief:
             effective_style = "fetch"
         if effective_style is None:
-            effective_style = "fetch" if (random_mode or embedded) else "markdown"
+            effective_style = (
+                "fetch" if (random_mode or embedded or offline) else "markdown"
+            )
 
-        distro_obj = Distro.from_args(args)
+        resolved_provider = llm_cfg.provider if llm_cfg else (provider_id if not offline else None)
+        resolved_model = llm_cfg.model if llm_cfg else None
 
         if args.json:
             payload = build_result_payload(
@@ -226,6 +342,9 @@ def main() -> None:
                 brief=brief,
                 embedded=embedded,
                 random_mode=random_mode,
+                offline=offline,
+                provider=resolved_provider if not offline else provider_id,
+                model=resolved_model,
             )
             emit_json(payload)
         else:
@@ -236,10 +355,24 @@ def main() -> None:
             )
             renderer.render(distro_obj, response)
 
+        # History: never store secrets; offline stores static text only
+        hist_args = {
+            k: v
+            for k, v in vars(args).items()
+            if k not in ()  # placeholder; keys never in args
+        }
+        hist_args["offline"] = offline
+        hist_args["auto_offline"] = auto_offline
+        hist_args["resolved_provider"] = resolved_provider if not offline else provider_id
+        if llm_cfg:
+            hist_args["resolved_model"] = llm_cfg.model
+            hist_args["key_source"] = llm_cfg.key_source  # name of env var only, not value
+
         new_entry = {
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "args": vars(args),
+            "args": hist_args,
             "response": response,
+            "offline": offline,
         }
         save_history(history, new_entry)
 

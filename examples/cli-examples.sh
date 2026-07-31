@@ -26,6 +26,12 @@ uv run linfo --distro Alpine --embedded --brief --json | head -c 500
 echo "..."
 
 echo ""
+echo "=== Offline / non-agentic (no API key required) ==="
+uv run linfo --offline --distro Ubuntu --brief
+uv run linfo --offline --distro OpenWrt --embedded --json | head -c 400
+echo "..."
+
+echo ""
 echo "=== Force markdown style with specific level and topics ==="
 uv run linfo --distro Fedora --style markdown --level intermediate --topics "package management,security"
 

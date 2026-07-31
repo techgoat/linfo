@@ -298,3 +298,125 @@ def test_json_payload_unknown_distro():
     assert payload["static_data"] is None
     assert payload["embedded"] is True
     assert payload["random_mode"] is True
+
+
+def test_json_payload_offline_fields():
+    d = Distro.from_name("Ubuntu")
+    payload = build_result_payload(
+        d,
+        response="static",
+        style="fetch",
+        brief=True,
+        embedded=False,
+        offline=True,
+        provider="xai",
+        model=None,
+    )
+    assert payload["offline"] is True
+    assert payload["provider"] == "xai"
+    assert payload["model"] is None
+
+
+def test_provider_default_is_xai(monkeypatch):
+    from linfo.providers import DEFAULT_PROVIDER, resolve_provider_id
+
+    monkeypatch.delenv("LINFO_LLM_PROVIDER", raising=False)
+    monkeypatch.delenv("AI_PROVIDER", raising=False)
+    assert DEFAULT_PROVIDER == "xai"
+    assert resolve_provider_id(None) == "xai"
+
+
+def test_provider_env_and_cli(monkeypatch):
+    from linfo.providers import resolve_provider_id
+
+    monkeypatch.setenv("LINFO_LLM_PROVIDER", "groq")
+    assert resolve_provider_id(None) == "groq"
+    assert resolve_provider_id("openai") == "openai"  # CLI wins
+
+
+def test_key_chain_prefers_provider_specific(monkeypatch):
+    from linfo.providers import resolve_llm_config
+
+    monkeypatch.setenv("XAI_API_KEY", "x" * 24)
+    monkeypatch.setenv("AI_API_KEY", "a" * 24)
+    cfg = resolve_llm_config(provider="xai", require_key=True)
+    assert cfg.api_key == "x" * 24
+    assert cfg.key_source == "XAI_API_KEY"
+    assert cfg.provider == "xai"
+    assert "x.ai" in cfg.base_url
+
+
+def test_key_chain_falls_back_to_ai_api_key(monkeypatch):
+    from linfo.providers import resolve_llm_config
+
+    monkeypatch.delenv("XAI_API_KEY", raising=False)
+    monkeypatch.delenv("LINFO_API_KEY", raising=False)
+    monkeypatch.setenv("AI_API_KEY", "g" * 24)
+    cfg = resolve_llm_config(provider="xai", require_key=True)
+    assert cfg.api_key == "g" * 24
+    assert cfg.key_source == "AI_API_KEY"
+
+
+def test_openai_provider_key_and_defaults(monkeypatch):
+    from linfo.providers import resolve_llm_config
+
+    monkeypatch.setenv("OPENAI_API_KEY", "o" * 24)
+    cfg = resolve_llm_config(provider="openai", require_key=True)
+    assert cfg.provider == "openai"
+    assert cfg.key_source == "OPENAI_API_KEY"
+    assert "openai.com" in cfg.base_url
+    assert cfg.model  # default model present
+
+
+def test_ollama_does_not_require_key(monkeypatch):
+    from linfo.providers import has_usable_credentials, resolve_llm_config
+
+    for var in (
+        "OLLAMA_API_KEY",
+        "AI_API_KEY",
+        "LINFO_API_KEY",
+        "XAI_API_KEY",
+    ):
+        monkeypatch.delenv(var, raising=False)
+    cfg = resolve_llm_config(provider="ollama", require_key=True)
+    assert cfg.has_credentials
+    assert has_usable_credentials("ollama")
+
+
+def test_missing_key_require_true_raises(monkeypatch):
+    from linfo.providers import resolve_llm_config
+
+    for var in ("XAI_API_KEY", "AI_API_KEY", "LINFO_API_KEY"):
+        monkeypatch.delenv(var, raising=False)
+    with pytest.raises(ValueError, match="No API key|Offline"):
+        resolve_llm_config(provider="xai", require_key=True)
+
+
+def test_has_usable_credentials_false_without_key(monkeypatch):
+    from linfo.providers import has_usable_credentials
+
+    for var in ("XAI_API_KEY", "AI_API_KEY", "LINFO_API_KEY"):
+        monkeypatch.delenv(var, raising=False)
+    assert has_usable_credentials("xai") is False
+
+
+def test_static_summary_and_offline_error():
+    from linfo.offline import build_static_summary, offline_missing_data_message
+
+    d = Distro.from_name("Ubuntu")
+    summary = build_static_summary(d)
+    assert "Ubuntu" in summary
+    assert "Package manager" in summary
+    assert "offline" in summary.lower() or "Static" in summary
+
+    msg = offline_missing_data_message("MysteryOS")
+    assert "MysteryOS" in msg
+    assert "Offline" in msg
+
+
+def test_get_api_key_uses_provider_chain(monkeypatch):
+    from linfo.secrets import get_api_key
+
+    monkeypatch.delenv("XAI_API_KEY", raising=False)
+    monkeypatch.setenv("AI_API_KEY", "z" * 24)
+    assert get_api_key() == "z" * 24

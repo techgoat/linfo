@@ -22,9 +22,26 @@ linfo --embedded   # random from embedded pool
 linfo --distro Ubuntu --brief --json
 linfo --distro Alpine --embedded --json | jq '.static_data'
 
+# Offline (no API key, static data only)
+linfo --offline --distro Ubuntu --brief
+linfo --offline --embedded --distro OpenWrt --json
+
+# Provider selection (default: xai)
+linfo --provider openai --distro Fedora --brief
+export LINFO_LLM_PROVIDER=xai
+export XAI_API_KEY=...   # or AI_API_KEY as generic fallback
+
 # Verbose (shows internal logs on console; always written to logs/)
 linfo -v --distro Arch
 ```
+
+### Offline vs agentic
+
+| Mode | When | Needs key? | Unknown distros |
+|------|------|------------|-----------------|
+| Agentic | Default when a key is available | Yes (except Ollama) | Yes (LLM + tools) |
+| Offline | `--offline` / `--non-agentic`, or auto if no key | No | Error (add to DB or use agentic) |
+| Force agentic | `--force-agentic` | Yes | Yes |
 
 See `examples/` for more (shell scripts, etc.).
 

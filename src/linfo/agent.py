@@ -9,7 +9,7 @@ from langchain_community.utilities import WikipediaAPIWrapper
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from langchain_openai import ChatOpenAI
 
-from linfo.secrets import get_api_key
+from linfo.providers import LLMConfig, resolve_llm_config
 
 
 def build_prompt(args, brief: bool = False, embedded: bool = False) -> str:
@@ -65,31 +65,64 @@ def build_prompt(args, brief: bool = False, embedded: bool = False) -> str:
     return prompt
 
 
-def run_agent(prompt: str, *, model: str | None = None) -> str:
+def run_agent(
+    prompt: str,
+    *,
+    model: str | None = None,
+    config: LLMConfig | None = None,
+    provider: str | None = None,
+    base_url: str | None = None,
+) -> str:
     """Initialize and run the LLM with tools using a manual tool-calling loop.
 
     The model may request tools (Wikipedia, DuckDuckGo). We execute them
     and feed results back until the model produces a final text response.
 
-    Security note: API key is fetched securely inside get_api_key and
+    Security note: API key is resolved via providers.resolve_llm_config and
     is never passed into the LLM context or logged.
 
     Args:
         prompt: The prompt for the agent.
-        model: Optional model id (default: env XAI_MODEL or grok-4).
+        model: Optional model id override.
+        config: Pre-resolved LLMConfig (preferred).
+        provider: Provider id if config is not supplied.
+        base_url: Base URL override if config is not supplied.
 
     Returns:
         LLM's final response content.
     """
-    import os
+    llm_cfg = config or resolve_llm_config(
+        provider=provider,
+        model=model,
+        base_url=base_url,
+        require_key=True,
+    )
+    if model:
+        # Allow explicit model override even when config was pre-built
+        llm_cfg = LLMConfig(
+            provider=llm_cfg.provider,
+            base_url=llm_cfg.base_url,
+            model=model,
+            api_key=llm_cfg.api_key,
+            requires_key=llm_cfg.requires_key,
+            key_source=llm_cfg.key_source,
+        )
 
-    api_key = get_api_key()
-    model_name = model or os.getenv("XAI_MODEL") or "grok-4"
+    if not llm_cfg.api_key and llm_cfg.requires_key:
+        raise ValueError("API key missing for agentic mode.")
+
+    logging.info(
+        "LLM init provider=%s model=%s base_url=%s key_source=%s",
+        llm_cfg.provider,
+        llm_cfg.model,
+        llm_cfg.base_url,
+        llm_cfg.key_source or ("placeholder" if not llm_cfg.requires_key else "unknown"),
+    )
 
     llm = ChatOpenAI(
-        model=model_name,
-        api_key=api_key,
-        base_url="https://api.x.ai/v1",
+        model=llm_cfg.model,
+        api_key=llm_cfg.api_key or "not-needed",
+        base_url=llm_cfg.base_url,
     )
 
     tools = [

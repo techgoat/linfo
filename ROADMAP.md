@@ -20,6 +20,10 @@ Initial support landed in **v0.6.0**:
 ### `--json` — **Shipped in 0.6.0**
 Machine-readable stdout via `linfo --json` (see `linfo.output.build_result_payload`).
 
+### Offline / multi-provider — **Shipped in 0.7.0**
+- `--offline` / `--non-agentic`, auto-offline without keys, `--force-agentic`
+- Provider registry + key chain (`xai` default, openai/groq/openrouter/ollama/custom)
+
 ### `--smallbase` / Minimal / Lightweight Distros
 Better support and presentation for very small, resource-friendly distributions.
 
@@ -66,8 +70,9 @@ Better support and presentation for very small, resource-friendly distributions.
 - Support for non-x86_64 / non-aarch64 architectures more explicitly in the fastfetch view.
 - A TUI mode (using Textual or similar) for interactive exploration.
 - First-class support for container / immutable / atomic distros (Fedora Silverblue, NixOS, etc.) with special facts.
-- Offline/static-only mode (skip LLM when curated data is enough, e.g. `--brief` + known distro).
 - History opt-out (`--no-history`) for shared machines.
+- Native Anthropic / Gemini adapters (beyond OpenAI-compatible).
+- Optional lighter install extra without LangChain for offline-only users.
 
 ## How to Propose or Prioritize Ideas
 

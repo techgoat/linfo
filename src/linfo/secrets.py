@@ -1,26 +1,27 @@
-"""Secure API key retrieval (OWASP Secrets Management)."""
+"""Secure API key retrieval (OWASP Secrets Management).
+
+Provider-aware resolution lives in ``linfo.providers``. This module keeps a
+small, xAI-oriented surface for backward compatibility.
+"""
 
 from __future__ import annotations
 
-import os
+from linfo.providers import resolve_llm_config
 
 
-def get_api_key() -> str:
-    """Securely retrieve the xAI API key.
+def get_api_key(provider: str | None = None) -> str:
+    """Securely retrieve an API key for the given (or default) provider.
 
     Follows OWASP Secrets Management: never hard-coded, fail closed,
     and the value is never placed in logs or history.
+
+    Default provider is xAI. Also accepts AI_API_KEY / LINFO_API_KEY via the
+    provider key chain (see ``linfo.providers``).
     """
-    key = os.getenv("XAI_API_KEY")
-    if not key:
-        raise ValueError(
-            "XAI_API_KEY environment variable not set. "
-            "Add it to .env or your environment (never commit secrets)."
-        )
-    # Basic sanity (don't log the actual key)
-    if len(key) < 20:
-        raise ValueError("XAI_API_KEY appears invalid (too short).")
-    return key
+    cfg = resolve_llm_config(provider=provider, require_key=True)
+    if not cfg.api_key:
+        raise ValueError("API key resolution failed (empty key).")
+    return cfg.api_key
 
 
 # Back-compat alias used in older docs / internal call sites

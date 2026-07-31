@@ -1,6 +1,6 @@
 [project]
 name = "linfo"
-version = "0.6.0"
+version = "0.7.0"
 description = "linfo - Linux distro info CLI with fastfetch-style output and LLM details"
 readme = "README.md"
 license = { text = "MIT" }

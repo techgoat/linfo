@@ -8,15 +8,14 @@ authors:
     email: "g04t@t3chg04t.wtf"
     orcid: "https://orcid.org/0009-0001-2601-8028"
 license: MIT
-version: "0.6.0"
+version: "0.7.0"
 date-released: "2026-07-31"
 abstract: |
-  An agentic Python CLI application that leverages Grok (via the xAI API) 
-  together with Wikipedia and web search tools to deliver tailored, 
-  up-to-date information about Linux distributions for different expertise 
-  levels and architectures. Features rich terminal output, query history, 
-  embedded/IoT profile, machine-readable JSON output, and optional 
-  random-distro exploration mode.
+  An agentic Python CLI application that leverages Grok (via the xAI API by
+  default) or other OpenAI-compatible providers, together with Wikipedia and
+  web search tools, to deliver tailored information about Linux distributions.
+  Features offline/static mode without an API key, multi-provider key chain,
+  rich terminal output, query history, embedded/IoT profile, and JSON output.
 repository-code: "https://github.com/techgoat/linfo"
 url: "https://github.com/techgoat/linfo"
 keywords:
@@ -38,7 +37,7 @@ preferred-citation:
       email: "g04t@t3chg04t.wtf"
       orcid: "https://orcid.org/0009-0001-2601-8028"
   year: 2026
-  version: "0.6.0"
+  version: "0.7.0"
   url: "https://github.com/techgoat/linfo"
   license: MIT
   abstract: |

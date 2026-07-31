@@ -17,6 +17,9 @@ def build_result_payload(
     brief: bool,
     embedded: bool,
     random_mode: bool = False,
+    offline: bool = False,
+    provider: str | None = None,
+    model: str | None = None,
 ) -> dict[str, Any]:
     """Build a stable JSON-serializable result object."""
     static = None
@@ -37,6 +40,9 @@ def build_result_payload(
         "style": style,
         "brief": brief,
         "embedded": embedded,
+        "offline": offline,
+        "provider": provider,
+        "model": model,
         "random_mode": random_mode,
         "static_data": static,
         "response": response or "",

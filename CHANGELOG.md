@@ -8,6 +8,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-07-31
+
+### Added
+- **`--offline` / `--non-agentic`**: Static-only mode — no LLM, no API key, no web tools. Uses curated `DISTRO_DATA` / `EMBEDDED_DISTRO_DATA` and a generated static summary. Clear error if the distro is not in the database.
+- **Auto-offline fallback**: When the selected provider has no usable credentials (and `--force-agentic` is not set), linfo switches to offline mode with a short notice instead of failing.
+- **`--force-agentic`**: Require LLM mode; disable auto-offline (errors if no key).
+- **Multi-provider LLM config** (`linfo.providers`):
+  - Providers: `xai` (default), `openai`, `groq`, `openrouter`, `ollama`, `custom`
+  - CLI: `--provider`, `--model`, `--base-url`
+  - Env: `LINFO_LLM_PROVIDER`, `LINFO_LLM_MODEL`, `LINFO_LLM_BASE_URL`, plus `AI_PROVIDER` / `AI_MODEL` / `AI_BASE_URL` aliases
+  - **Key chain** per provider (most specific first), e.g. xAI: `XAI_API_KEY` → `AI_API_KEY` → `LINFO_API_KEY`
+- Modules: `providers.py`, `offline.py`
+
+### Changed
+- `run_agent` accepts resolved `LLMConfig` (provider base URL + model + key).
+- `get_api_key()` is provider-aware (default xAI) via the key chain.
+- JSON payload includes `offline`, `provider`, and `model`.
+- Version bumped to **0.7.0**.
+
+### Documentation
+- README, usage, architecture, examples, ROADMAP updated for offline mode and providers.
+
 ## [0.6.0] - 2026-07-31
 
 ### Added
@@ -116,7 +138,8 @@ See full discussion in the research section of development notes and `.grok/AGEN
 
 ## Links
 
-[Unreleased]: https://github.com/techgoat/linfo/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/techgoat/linfo/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/techgoat/linfo/releases/tag/v0.7.0
 [0.6.0]: https://github.com/techgoat/linfo/releases/tag/v0.6.0
 [0.5.0]: https://github.com/techgoat/linfo/releases/tag/v0.5.0
 
